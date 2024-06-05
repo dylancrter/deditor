@@ -1,9 +1,17 @@
+/*** includes ***/
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
 #include <errno.h>
+
+/*** preprocessor definitions ***/
+
+#define CTRL_KEY(k) ((k) & 0x1f)
+
+/*** function prototypes ***/
 
 // Enables raw mode 
 void enableRawMode(void);
@@ -14,8 +22,21 @@ void disableRawMode(void);
 // Prints error message and exits program
 void die(const char *s);
 
+// Low-level keypressing
+char editorReadKey(void);
+
+// Mapping keypresses to editor operations
+void editorProcessKeypress(void);
+
+// Clear screen and reposition cursor
+void editorRefreshScreen(void);
+
+/*** data ***/
+
 // Stores data from original terminal
 struct termios orig_termios;
+
+/*** terminal ***/
 
 void enableRawMode(void) {
   if (tcgetattr(STDIN_FILENO, &orig_termios) == -1) die("tcgetattr");
@@ -39,22 +60,48 @@ void disableRawMode(void) {
 } // disableRawMode
 
 void die(const char *s) {
+  editorRefreshScreen();
+  
   perror(s);
   exit(1);
 } // die
+
+char editorReadKey(void) {
+  int nread;
+  char c;
+  while ((nread = read(STDIN_FILENO, &c, 1)) != 1) {
+    if (nread == -1 && errno != EAGAIN) die("read");
+  } // while
+  return c;
+} // editorReadKey
+
+/*** output ***/
+
+void editorRefreshScreen(void) {
+  write(STDOUT_FILENO, "\x1b[2J", 4);
+  write(STDOUT_FILENO, "\x1b[H", 3);
+} // editorRefreshScreen
+
+/** input ***/
+
+void editorProcessKeypress(void) {
+  char c = editorReadKey();
+
+  switch(c) {
+  case CTRL_KEY('q'):
+    exit(0);
+    break;
+  } // case
+} // editorProcessKeypress
+
+/*** init ***/
 
 int main(void) {
   enableRawMode();
   
   while (1) {
-    char c = '\0';
-    if (read(STDIN_FILENO, &c, 1) == -1 && errno != EAGAIN) die("read");
-    if (iscntrl(c)) {
-      printf("%d\r\n", c);
-    } else {
-      printf("%d ('%c')\r\n", c, c);
-    } // if
-    if (c == 'q') break;
+    editorRefreshScreen();
+    editorProcessKeypress();
   } // while
   return 0;
 } // main
