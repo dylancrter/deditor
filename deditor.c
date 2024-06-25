@@ -29,12 +29,19 @@ enum editorKey {
 
 /*** data ***/
 
+typedef struct erow {
+  int size;
+  char *chars;
+} erow;
+
 // Stores data from original terminal
 struct editorConfig {
   struct termios orig_termios;
   int screenRows;
   int screenCols;
   int cx, cy;
+  int numRows;
+  erow row;
 };
 
 struct editorConfig E;
@@ -325,6 +332,7 @@ void editorProcessKeypress(void) {
 void initEditor(void) {
   E.cx = 0;
   E.cy = 0;
+  E.numRows = 0;
   
   if (getWindowSize(&E.screenRows, &E.screenCols) == -1) die("getWindowSize");
 } // initEditor
