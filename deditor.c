@@ -19,8 +19,9 @@
 
 /*** defines ***/
 
-#define KILO_VERSION "0.0.1"
-#define KILO_TAB_STOP 8
+#define DEDITOR_VERSION "0.0.1"
+#define DEDITOR_TAB_STOP 8
+#define DEDITOR_QUIT_TIMES 3
 
 #define CTRL_KEY(k) ((k) & 0x1f)
 
@@ -187,7 +188,7 @@ int editorRowCxtoRx(erow *row, int cx) {
   int j;
   for (j = 0; j < cx; j++) {
     if (row->chars[j] == '\t') {
-      rx += (KILO_TAB_STOP - 1) - (rx % KILO_TAB_STOP);
+      rx += (DEDITOR_TAB_STOP - 1) - (rx % DEDITOR_TAB_STOP);
     }
     rx++;
   }
@@ -202,13 +203,13 @@ void editorUpdateRow(erow *row) {
   } 
   
   free(row->render);
-  row->render = malloc(row->size + tabs*(KILO_TAB_STOP - 1) + 1);
+  row->render = malloc(row->size + tabs*(DEDITOR_TAB_STOP - 1) + 1);
 
   int idx = 0;
   for (j = 0; j < row->size; j++) {
     if (row->chars[j] == '\t') {
       row->render[idx++] = ' ';
-      while (idx % KILO_TAB_STOP != 0) row->render[idx++] = ' ';
+      while (idx % DEDITOR_TAB_STOP != 0) row->render[idx++] = ' ';
     } else {
       row->render[idx++] = row->chars[j];
     }
@@ -373,7 +374,7 @@ void editorDrawRows(struct abuf *ab) {
       if (E.numrows == 0 && y == E.screenrows / 3) {
         char welcome[80];
         int welcomelen = snprintf(welcome, sizeof(welcome),
-          "Kilo editor -- version %s", KILO_VERSION);
+          "Kilo editor -- version %s", DEDITOR_VERSION);
         if (welcomelen > E.screencols) welcomelen = E.screencols;
         int padding = (E.screencols - welcomelen) / 2;
         if (padding) {
@@ -502,6 +503,8 @@ void editorMoveCursor(int key) {
 }
 
 void editorProcessKeypress(void) {
+  static int quit_times = DEDITOR_QUIT_TIMES;
+
   int c = editorReadKey();
 
   switch (c) {
@@ -510,6 +513,12 @@ void editorProcessKeypress(void) {
       break;
 
     case CTRL_KEY('q'):
+      if (E.dirty > 0 && quit_times > 0) {
+        editorSetStatusMessage("WARNING: File has unsaved changes. "
+          "Press Ctrl-Q %d more times to quit.", quit_times);
+          quit_times--;
+          return;
+      }
       write(STDOUT_FILENO, "\x1b[2J", 4);
       write(STDOUT_FILENO, "\x1b[H", 3);
       exit(0);
@@ -566,6 +575,8 @@ void editorProcessKeypress(void) {
       editorInsertChar(c);
       break;
   }
+
+  quit_times = DEDITOR_QUIT_TIMES;
 }
 
 /*** init ***/
