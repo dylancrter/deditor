@@ -1,7 +1,7 @@
 deditor
 =======
 
-deditor is a lightweight text editor based on the Kilo text editor.
+deditor is my lightweight text editor based on the kilo text editor.
 
 Usage: deditor \<filename\>
 
@@ -11,6 +11,14 @@ Keys:
     CTRL-Q: Quit
     CTRL-F: Find string in file (ESC to exit search, arrows to navigate)
 
-Features will be added but in the meantime feel free to use it as a starting point to build better ones.
+Resources Used:
 
-deditor is released under the MIT license.
+    http://antirez.com/news/108
+    https://viewsourcecode.org/snaptoken/kilo/index.html
+
+Upcoming Features:
+
+    Line Numbers (woohoo!)
+    Copy & Paste
+    Multiple Buffers
+    Config File
