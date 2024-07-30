@@ -3,7 +3,7 @@ deditor
 
 deditor is my lightweight text editor based on the kilo text editor.
 
-Usage: deditor \<filename\>
+- Usage: deditor \<filename\>
 
 Keys:
 
@@ -18,7 +18,7 @@ Resources Used:
 
 Upcoming Features:
 
-    Line Numbers (woohoo!)
-    Copy & Paste
-    Multiple Buffers
-    Config File
+- Line Numbers
+- Copy & Paste
+- Multiple Buffers
+- Config File
